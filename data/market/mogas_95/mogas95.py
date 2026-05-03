@@ -3,6 +3,7 @@ import pdfplumber
 from io import BytesIO
 import datetime
 from datetime import timedelta
+import pandas as pd
 import re
 
 def find_last_sunday():
@@ -56,4 +57,5 @@ def extract_mogas_95():
     mogas_95_label, mogas_95_price = extract_mogas_95_price_from_pdf(response)
     match = re.search(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b", mogas_95_label)
     mogas_95_date = match.group(0) if match else None
-    return mogas_95_price, mogas_95_date
+    mogas_95_date = pd.to_datetime(mogas_95_date, dayfirst=True).strftime('%Y-%m-%d')
+    return float(mogas_95_price), mogas_95_date

@@ -1,3 +1,4 @@
 yfinance
 pdfplumber
 supabase
+pandas
