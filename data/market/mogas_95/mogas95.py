@@ -22,7 +22,8 @@ def get_latest_aip_report_url(daydelay: int) -> str:
     last_sunday = today - timedelta(days=days_since_sunday % 7)
     
     month_str = last_sunday.strftime("%Y-%m")
-    date_str = last_sunday.strftime("%d %B %Y")  # e.g. "5 April 2026"
+    # Use %d and strip leading zero for cross-platform compatibility
+    date_str = last_sunday.strftime("%d %B %Y").lstrip("0")  # e.g. "5 April 2026"
     
     return (
         f"https://www.aip.com.au/sites/default/files/download-files/"
