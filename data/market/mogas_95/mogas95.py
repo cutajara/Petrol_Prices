@@ -5,8 +5,16 @@ import datetime
 from datetime import timedelta
 import pandas as pd
 import re
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 def find_last_sunday():
+    """Find the number of days to subtract to get to the most recent Sunday. if today is Sunday, returns 7 to get the previous Sunday."""
     today = datetime.datetime.now().weekday()
     days = (today+1) % 7
     if days == 0:
@@ -17,7 +25,6 @@ def get_latest_aip_report_url(daydelay: int) -> str:
     """Build URL for the most recent Sunday AIP report."""
     # AIP publishes on Sundays — find the last Sunday
     today = datetime.datetime.now() - timedelta(days=daydelay)  # Ensure we get last Sunday's report even if today is Sunday
-    #print("Waring: Dev lagged by a week")
     days_since_sunday = today.weekday() + 1  # Monday=0, so Sunday=-1 mod 7
     last_sunday = today - timedelta(days=days_since_sunday % 7)
     
@@ -36,7 +43,7 @@ def extract_mogas_95_price_from_pdf(response) -> str:
         tables = first_page.extract_tables()
         
         if not tables:
-            print("No tables found on first page")
+            logger.error("No tables found on page")
             return None
         
         # Inspect the first table
@@ -52,11 +59,10 @@ def extract_mogas_95():
     response = requests.get(report_url, timeout=15)
         
     if response.status_code != 200:
-        print(f"Could not fetch AIP report: {report_url}")
-        #return None
-        
+        raise ValueError(f"Could not fetch AIP report: {report_url}")
+                
     mogas_95_label, mogas_95_price = extract_mogas_95_price_from_pdf(response)
     match = re.search(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b", mogas_95_label)
     mogas_95_date = match.group(0) if match else None
-    mogas_95_date = pd.to_datetime(mogas_95_date, dayfirst=True).strftime('%Y-%m-%d')
+    mogas_95_date = pd.to_datetime(mogas_95_date, dayfirst=True).strftime('%Y-%m-%d') # Perfor wranglings to get the date of the price
     return float(mogas_95_price), mogas_95_date
