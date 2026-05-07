@@ -18,6 +18,8 @@ API_URL          = "https://api.fuel.service.vic.gov.au/open-data/v1/fuel/prices
 
 def fetch_api() -> dict:
     """Fetch current fuel prices from Servo Saver API."""
+    
+    SERVO_SAVER_API  = os.environ["SERVO_SAVER_API"]
     headers = {
         "User-Agent":      "PetrolPredictor/1.0",
         "x-consumer-id":   SERVO_SAVER_API,
@@ -126,7 +128,6 @@ def main():
     
     SUPABASE_URL     = os.environ["SUPABASE_URL"]
     SUPABASE_KEY     = os.environ["SUPABASE_KEY"]
-    SERVO_SAVER_API  = os.environ["SERVO_SAVER_API"]
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     
     data = fetch_api()
