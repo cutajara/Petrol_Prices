@@ -1,15 +1,14 @@
-name: Get Market Data
+name: Get Servo Saver Data
 
 on:
   schedule:
-    - cron: '10 6 * * *'
+    - cron: '0 6,18 * * *'
   workflow_dispatch:
 
 jobs:
-  market_data:
+  servo_data:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,9 +24,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run collectMarketData.py
+      - name: Run get_servo_saver.py
         env:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        working-directory: data/market
-        run: python collectMarketData.py
+          SERVO_SAVER_API: ${{ secrets.SERVO_SAVER_API }}
+        working-directory: data/servo_saver
+        run: python get_servo_saver.py
