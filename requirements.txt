@@ -2,3 +2,6 @@ yfinance
 pdfplumber
 supabase
 pandas
+matplotlib
+seaborn
+geopandas

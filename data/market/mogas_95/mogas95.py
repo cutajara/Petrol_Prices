@@ -66,3 +66,8 @@ def extract_mogas_95():
     mogas_95_date = match.group(0) if match else None
     mogas_95_date = pd.to_datetime(mogas_95_date, dayfirst=True).strftime('%Y-%m-%d') # Perfor wranglings to get the date of the price
     return float(mogas_95_price), mogas_95_date
+
+
+if __name__ == "__main__":
+    price, date = extract_mogas_95()
+    print(f"Mogas 95 price: {price}, Date: {date}")
