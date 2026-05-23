@@ -31,3 +31,10 @@ jobs:
           SERVO_SAVER_API: ${{ secrets.SERVO_SAVER_API }}
         working-directory: data/servo_saver
         run: python get_servo_saver.py
+
+      - name: Run append_station_geo.py
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        working-directory: data/servo_saver
+        run: python append_station_geo.py
