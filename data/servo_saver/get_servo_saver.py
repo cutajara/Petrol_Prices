@@ -5,6 +5,8 @@ import os
 import logging
 from supabase import create_client
 from datetime import datetime, timezone
+import sys
+import time
 
 logging.basicConfig(
     level=logging.INFO,
@@ -137,4 +139,18 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    max_attempts = 3
+    base_delay_seconds = 5
+    for attempt in range(1, max_attempts + 1):
+        try:
+            main()
+            sys.exit(0)  # Success, exit the script 
+        except Exception as e:
+            logger.error(f"Attempt {attempt} failed: {e}")
+            if attempt < max_attempts:
+                delay = base_delay_seconds * (2 ** (attempt - 1))  # Exponential backoff
+                logger.info(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                logger.critical("All attempts failed. Exiting.")
+                raise Exception(f"Failed to fetch and store fuel prices after {max_attempts} attempts")
