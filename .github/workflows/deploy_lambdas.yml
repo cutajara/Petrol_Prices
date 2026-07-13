@@ -1,0 +1,44 @@
+name: Deploy Python 3.11 Lambda via Docker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-2 # Change to your AWS Region
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: petrol-predictor-lambda # Change to your ECR Repository Name
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      #- name: Update All Lambda Functions
+      #  run: |
+      #    IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/petrol-predictor-lambda:latest"
+      #    
+      #    # Update Lambda 1
+      #    aws lambda update-function-code --function-name servo_data --image-uri $IMAGE_URI
+      #    
+      #    # Update Lambda 2
+      #    aws lambda update-function-code --function-name market_data --image-uri $IMAGE_URI
+      #    
+      #    # Update Lambda 3
+      #    aws lambda update-function-code --function-name station_geo --image-uri $IMAGE_URI

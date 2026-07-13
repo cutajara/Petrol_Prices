@@ -1,5 +1,6 @@
 yfinance
 pdfplumber
 pandas
-psycopg2-binary
+psycopg2
 boto3
+geopandas
