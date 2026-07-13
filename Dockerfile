@@ -1,10 +1,10 @@
 FROM public.ecr.aws/lambda/python:3.11
 
 
-# 1. Install GCC and the native PROJ/Geospatial system packages
-RUN microdnf update -y && \
-    microdnf install -y gcc gcc-c++ make findutils git proj-devel && \
-    microdnf clean all
+# 1. Install GCC, Git, and native PROJ system libraries using YUM
+RUN yum update -y && \
+    yum install -y gcc gcc-c++ make findutils git proj-devel && \
+    yum clean all
 
 # 2. Tell the compiler explicitly where the PROJ library lives inside Linux
 ENV PROJ_DIR=/usr
