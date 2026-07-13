@@ -1,7 +1,16 @@
 FROM public.ecr.aws/lambda/python:3.11
 
-# Update pip
-RUN pip install --no-cache-dir --upgrade pip
+
+# 1. Install GCC and the native PROJ/Geospatial system packages
+RUN microdnf update -y && \
+    microdnf install -y gcc gcc-c++ make findutils git proj-devel && \
+    microdnf clean all
+
+# 2. Tell the compiler explicitly where the PROJ library lives inside Linux
+ENV PROJ_DIR=/usr
+
+# 3. Upgrade Python installation tools
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Copy and install the heavy requirements once
 COPY requirements_lambda.txt ${LAMBDA_TASK_ROOT}
