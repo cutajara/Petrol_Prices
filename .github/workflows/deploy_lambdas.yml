@@ -34,6 +34,7 @@ jobs:
         run: |
           IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/petrol-predictor-lambda:latest"
           aws lambda update-function-code --function-name servo_data --image-uri $IMAGE_URI
+
       #    
       #    # Update Lambda 2
       #    aws lambda update-function-code --function-name market_data --image-uri $IMAGE_URI
@@ -45,3 +46,11 @@ jobs:
 
       #    # Update Lambda 3
       #    aws lambda update-function-code --function-name station_geo --image-uri $IMAGE_URI
+
+      - name: Update Lambda environment variables
+        env:
+          SERVO_SAVER_API: ${{ secrets.SERVO_SAVER_API }}
+        run: |
+          aws lambda update-function-configuration \
+            --function-name servo_data \
+            --environment "Variables={SERVO_SAVER_API=$SERVO_SAVER_API}"
