@@ -54,7 +54,9 @@ jobs:
       - name: Update Lambda environment variables
         env:
           SERVO_SAVER_API: ${{ secrets.SERVO_SAVER_API }}
+          SECRET_NAME: ${{ secrets.SECRET_NAME }}
+          RDS_ENDPOINT: ${{ secrets.RDS_ENDPOINT }}
         run: |
           aws lambda update-function-configuration \
             --function-name servo_data \
-            --environment "Variables={SERVO_SAVER_API=$SERVO_SAVER_API}"
+            --environment "Variables={SERVO_SAVER_API=$SERVO_SAVER_API,SECRET_NAME=$SECRET_NAME,RDS_ENDPOINT=$RDS_ENDPOINT}"
