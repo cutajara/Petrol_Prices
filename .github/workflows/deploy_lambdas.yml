@@ -37,7 +37,8 @@ jobs:
 
     
           # Update Lambda 2
-          aws lambda update-function-code --function-name market_data --image-uri $IMAGE_URI    
+          aws lambda update-function-code --function-name market_data --image-uri $IMAGE_URI
+          aws lambda wait function-updated --function-name market_data
           aws lambda update-function-configuration \
            --function-name market_data \
            --package-type Image \
@@ -45,6 +46,7 @@ jobs:
 
           # Update Lambda 3
           aws lambda update-function-code --function-name station_geo --image-uri $IMAGE_URI
+          aws lambda wait function-updated --function-name station_geo
           aws lambda update-function-configuration \
            --function-name station_geo \
            --package-type Image \
