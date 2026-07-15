@@ -46,7 +46,7 @@ jobs:
           # Update Lambda 3
           aws lambda update-function-code --function-name station_geo --image-uri $IMAGE_URI
           aws lambda update-function-configuration \
-           --function-name market_data \
+           --function-name station_geo \
            --package-type Image \
            --image-config '{"Command":["data.servo_saver.append_station_geo_lambda.lambda_handler"]}'
 
