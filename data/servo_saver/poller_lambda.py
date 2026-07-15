@@ -8,6 +8,12 @@ import psycopg2.extras
 import requests
 import pandas as pd
 from datetime import datetime, timezone
+import sys
+from pathlib import Path
+MARKET_DIR = Path(__file__).resolve().parent
+if str(MARKET_DIR) not in sys.path:
+    sys.path.insert(0, str(MARKET_DIR))
+
 from get_servo_saver import fetch_api, process_response
 
 # --- Logging ---

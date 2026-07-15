@@ -4,6 +4,12 @@ import json
 import boto3
 import psycopg2
 from datetime import datetime, timezone
+import sys
+from pathlib import Path
+MARKET_DIR = Path(__file__).resolve().parent
+if str(MARKET_DIR) not in sys.path:
+    sys.path.insert(0, str(MARKET_DIR))
+
 from collectMarketData import collectMarketData
 
 # --- Logging ---

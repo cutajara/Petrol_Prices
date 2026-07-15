@@ -38,5 +38,10 @@ jobs:
       #    # Update Lambda 2
       #    aws lambda update-function-code --function-name market_data --image-uri $IMAGE_URI
       #    
+      #    aws lambda update-function-configuration \
+      #     --function-name market_data \
+      #     --package-type Image \
+      #     --image-config '{"Command":["data.market.market_data_lambda.lambda_handler"]}'
+
       #    # Update Lambda 3
       #    aws lambda update-function-code --function-name station_geo --image-uri $IMAGE_URI
