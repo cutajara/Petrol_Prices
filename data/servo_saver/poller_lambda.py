@@ -1,11 +1,10 @@
-import uuid
 import logging
 import os
 import json
 import boto3
 import psycopg2
 import psycopg2.extras
-import requests
+import time
 import pandas as pd
 from datetime import datetime, timezone
 import sys
@@ -172,9 +171,21 @@ def run():
 
 def lambda_handler(event, context):
     """AWS Lambda entry point."""
-    run()
-    return {"statusCode": 200, "body": "Poller complete"}
-
+    max_attempts = 5
+    base_delay_seconds = 5
+    for attempt in range(1, max_attempts + 1):
+        try:
+            run()
+            return {"statusCode": 200, "body": "Poller complete"}
+        except Exception as e:
+            logger.error(f"Attempt {attempt} failed: {e}")
+            if attempt < max_attempts:
+                delay = base_delay_seconds * (2 ** (attempt - 1))  # Exponential backoff
+                logger.info(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                logger.critical("All attempts failed. Exiting.")
+                raise Exception(f"Failed to fetch and store fuel prices after {max_attempts} attempts")
 
 # Local testing
 if __name__ == "__main__":
