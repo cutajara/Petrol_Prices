@@ -1,10 +1,15 @@
-import market_metrics.marketmetrics as mm
-import mogas_95.mogas95 as m95
 import datetime
 from datetime import timezone
 from supabase import create_client
 import os
 import logging
+import sys
+from pathlib import Path
+MARKET_DIR = Path(__file__).resolve().parent
+if str(MARKET_DIR) not in sys.path:
+    sys.path.insert(0, str(MARKET_DIR))
+import market_metrics.marketmetrics as mm
+import mogas_95.mogas95 as m95
 
 logging.basicConfig(
     level=logging.INFO,

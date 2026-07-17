@@ -1,8 +1,14 @@
-from poller_lambda import get_db_connection
 import os
 import logging
-from append_station_geo import download_abs_meshblockdata, append_geographic_info
 import pandas as pd
+import sys
+from pathlib import Path
+MARKET_DIR = Path(__file__).resolve().parent
+if str(MARKET_DIR) not in sys.path:
+    sys.path.insert(0, str(MARKET_DIR))
+    
+from append_station_geo import download_abs_meshblockdata, append_geographic_info
+from poller_lambda import get_db_connection
 
 # --- Logging ---
 logging.basicConfig(

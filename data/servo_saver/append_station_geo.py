@@ -14,9 +14,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-SUPABASE_URL     = os.environ["SUPABASE_URL"]
-SUPABASE_KEY     = os.environ["SUPABASE_KEY"]
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+SUPABASE_URL     = os.environ.get("SUPABASE_URL", "fakekey")
+SUPABASE_KEY     = os.environ.get("SUPABASE_KEY", "fakekey")
+
+if SUPABASE_URL != "fakekey":
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def select_supabase(table, columns="*", filters=None, batch_size=1000):
      all_rows = []
