@@ -44,7 +44,7 @@ BATCH_SIZE = 1000  # rows per insert batch
 # Helpers
 # ---------------------------------------------------------------
 
-def fetch_all_supabase(table: str, columns: str = "*") -> pd.DataFrame:
+def fetch_all_supabase(table: str, columns: str = "*", order_by: str = "id") -> pd.DataFrame:
     all_rows  = []
     page_size = 1000
     start     = 0
@@ -53,6 +53,7 @@ def fetch_all_supabase(table: str, columns: str = "*") -> pd.DataFrame:
         result = (
             supabase.table(table)
             .select(columns)
+            .order(order_by)
             .range(start, start + page_size - 1)
             .execute()
         )
