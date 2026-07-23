@@ -8,6 +8,7 @@ __pycache__/
 
 Lambda/lambda-layer/python/*
 *.zip
+*.pkl
 
 # Distribution / packaging
 .Python

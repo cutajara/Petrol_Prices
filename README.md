@@ -76,7 +76,7 @@ ECR --> L2
 
 ## Flow
 - EventBridge schedules Lambda functions to select the data and insert into RDS Postgres database
-- The Lambda environment runs as in image whihch is stored in ECR, this is updated with Github actions on changes to main
+- The Lambda environment runs as in image which is stored in ECR, this is updated with Github actions on changes to main.
 - Secrets manager stores the keys
 - CloudWatch alarms are set to notify of errors via SNS
 
@@ -86,4 +86,4 @@ ECR --> L2
 
 
 # Supabase
-Flow was orignally run with Github actions and Supabase. This has been mirgated to AWS. The supabase and and Github actions runs are still supported at the moment.
+Flow was orignally run with Github actions and Supabase. This has been mirgated to AWS. The supabase and Github actions runs are still supported at the moment.
