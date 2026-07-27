@@ -27,7 +27,7 @@ ON servo_stations (sa4_name21);
 CREATE INDEX IF NOT EXISTS idx_servo_stations_gcc
 ON servo_stations (gcc_name21);
 
-CREATE INDEX IF NOT idx_servo_stations_location
+CREATE INDEX IF NOT EXISTS idx_servo_stations_location
 ON servo_stations USING gist (point(longitude, latitude));
 
 

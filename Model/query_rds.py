@@ -1,24 +1,42 @@
 import os
 import pandas as pd
 import psycopg2
+import boto3
 from dotenv import load_dotenv
-
 load_dotenv()
 
 RDS_ENDPOINT = os.environ["RDS_ENDPOINT"]
 RDS_SECRET = os.environ["RDS_SECRET"]
 
+AURORA_ENDPOINT = os.environ["AURORA_ENDPOINT"]
+REGION = os.environ["REGION"]
+AURORA_DB = os.environ["AURORA_DB"]
+AURORA_USER = os.environ["AURORA_USER"]
+
+AURORA_HOST= f"{AURORA_DB}.{AURORA_ENDPOINT}.{REGION}.rds.amazonaws.com"
+
+def get_iam_token() -> str:
+    """Generate IAM auth token for Aurora."""
+    client = boto3.client("rds", region_name=REGION)
+    return client.generate_db_auth_token(
+        DBHostname=AURORA_HOST,
+        Port=5432,
+        DBUsername=AURORA_USER,
+        Region=REGION,
+    )
 
 def query_rds(sql):
 
     # Check RDS
     rds = psycopg2.connect(
-        host=f"{RDS_ENDPOINT}.ap-southeast-2.rds.amazonaws.com",
+        host=AURORA_HOST,
         port=5432,
-        dbname="petrol_predictor",
-        user="petrol_admin",
-        password=RDS_SECRET,
-        sslmode="require"
+        #dbname=AURORA_DB,
+        database='postgres',
+        user=AURORA_USER,
+        password=get_iam_token(),
+        sslmode="require",
+        connect_timeout=10,
     )
     cur = rds.cursor()
 
