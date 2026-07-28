@@ -85,10 +85,14 @@ def run():
     logger.info("=" * 50)
     logger.info(f"Market data fetch started at {datetime.now(timezone.utc).isoformat()}")
 
+    logger.info("Getting Market data...")
+    todays_data_list = collectMarketData() # Get the data
+    
+    logger.info("Market data collected, connecting to RDS...")
+    
     conn = get_db_connection()
     logger.info("Connected to RDS")
     
-    todays_data_list = collectMarketData() # Get the data
 
     try:
         with conn.cursor() as cur:
