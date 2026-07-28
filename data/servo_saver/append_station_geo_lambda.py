@@ -76,10 +76,13 @@ def run():
             logger.info("All stations have geography assigned — nothing to do")
             return
 
+        conn.close()
         meshblock = download_abs_meshblockdata()
-        
+        logger.info("Download Complete")
         geography_df = append_geographic_info(stations_df,meshblock)
         
+        logger.inf("Ready to update RDS")
+        conn = get_db_connection()
         update_stations(conn, geography_df) 
     
     finally:
