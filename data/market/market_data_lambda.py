@@ -13,11 +13,8 @@ if str(MARKET_DIR) not in sys.path:
 from collectMarketData import collectMarketData
 
 # --- Logging ---
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # --- Config ---
 AURORA_ENDPOINT = os.environ["AURORA_ENDPOINT"]
@@ -51,7 +48,7 @@ def get_db_connection():
         user=AURORA_USER,
         password=get_iam_token(),
         sslmode="require",
-        connect_timeout=10,
+        connect_timeout=300,
     )
 
 
