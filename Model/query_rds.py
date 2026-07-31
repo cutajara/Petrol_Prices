@@ -32,7 +32,7 @@ def connect_rds():
         user=AURORA_USER,
         password=get_iam_token(),
         sslmode="require",
-        connect_timeout=10,
+        connect_timeout=60,
     )
 
 def query_rds(sql):

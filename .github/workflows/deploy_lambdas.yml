@@ -82,6 +82,7 @@ jobs:
           AURORA_ENDPOINT: ${{ secrets.AURORA_ENDPOINT }}
           AURORA_USER: ${{ secrets.AURORA_USER }}
           REGION: ${{ secrets.REGION }}
+          MODEL_BUCKET_NAME: ${{ secrets.MODEL_BUCKET_NAME }}
         run: |
           aws lambda update-function-configuration \
             --function-name servo_data \
@@ -97,9 +98,9 @@ jobs:
 
           aws lambda update-function-configuration \
             --function-name train_u91 \
-            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION,MODEL_BUCKET_NAME=$MODEL_BUCKET_NAME}"
 
 
           aws lambda update-function-configuration \
             --function-name predict_u91 \
-            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION,MODEL_BUCKET_NAME=$MODEL_BUCKET_NAME}"

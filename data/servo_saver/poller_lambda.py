@@ -158,7 +158,7 @@ def run():
 
         # 3. Process response
         stations_df, prices_df = process_response(data)
-        print(stations_df.head())
+        #print(stations_df.head())
         # 4. Upsert stations
         upsert_stations(conn, stations_df.reset_index())
 
