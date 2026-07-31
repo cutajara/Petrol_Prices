@@ -34,6 +34,7 @@ def download_model(s3, bucket: str, key):
     return model
 
 def predict():
+    print("Getting data for prediction...")
     extrafilter = "AND (updated_at AT TIME ZONE 'Australia/Melbourne')::date >= (now() AT TIME ZONE 'Australia/Melbourne')::date - INTERVAL '8 days'"
     dfp = mf.extract_prices(extrafilter)
     dates_list=list(set(dfp['price_date'].astype(str)))
@@ -51,18 +52,21 @@ def predict():
     trainingformat = download_model(s3, BUCKET_NAME, 'u91_training_format.pkl')
     df_feats = mf.features(df)
 
+    print("Preparing data ...")
     latestprice = df_feats.iloc[-1].price
     print(f"The latest day in from the servo saver is {df_feats.iloc[-1].name}")
 
     df_feats = df_feats[trainingformat.keys()]
     df_feats = df_feats.astype(trainingformat)
 
+    print("Getting models...")
     model1 = download_model(s3, BUCKET_NAME, 'u91_1day.pkl')
     model2 = download_model(s3, BUCKET_NAME, 'u91_2day.pkl')
     model3 = download_model(s3, BUCKET_NAME, 'u91_3day.pkl')
     #model1 = joblib.load('u91_1day.pkl')
     #model2 = joblib.load('u91_2day.pkl')
     #model3 = joblib.load('u91_3day.pkl')
+    print("Making predictions...")
     daychange_1 = model1.predict(pd.DataFrame(df_feats.iloc[-1]).T)
     daychange_2 = model2.predict(pd.DataFrame(df_feats.iloc[-1]).T)
     daychange_3 = model3.predict(pd.DataFrame(df_feats.iloc[-1]).T)
@@ -98,8 +102,8 @@ def predict():
     ]
 
 
-    conn = connect_rds()
-    
+    print("Inserting predictions...")
+    conn = connect_rds()    
     with conn.cursor() as cur:
             psycopg2.extras.execute_batch(cur, sql, rows, page_size=500)
     conn.commit()

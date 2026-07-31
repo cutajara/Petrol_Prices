@@ -2,7 +2,6 @@ import pandas as pd
 from datetime import datetime, timezone
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -116,8 +115,8 @@ def trainmodel(df, days_from_now, n_splits=5):
     model = RandomForestRegressor(**model_kwargs)
     model.fit(features, target)
 
-    plt.scatter(target, model.predict(features))
-    plt.title(f"In-sample fit, {days_from_now}-day model")
-    plt.show()
+    #plt.scatter(target, model.predict(features))
+    #plt.title(f"In-sample fit, {days_from_now}-day model")
+    #plt.show()
 
     return model

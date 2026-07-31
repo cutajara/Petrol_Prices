@@ -32,6 +32,7 @@ def upload_model(model, bucket: str, key: str):
     
 
 def train_model():
+    print("Getting data...")
     dfp = mf.extract_prices()
     dates_list=list(set(dfp['price_date'].astype(str)))
     dfm = mf.extract_markets(dates_list)
@@ -40,14 +41,17 @@ def train_model():
     dfp['price_date'] = dfp['price_date'].astype(str)
     df = dfm.merge(dfp, left_on='date', right_on="price_date", how="left")
 
+    print("Preparing data...")
     df_feats = mf.features(df)
     #
+    print("Training models...")
     model1 = mf.trainmodel(df_feats.copy(), 1)
     model2 = mf.trainmodel(df_feats.copy(), 2)
     model3 = mf.trainmodel(df_feats.copy(), 3)
     #
     training_types = dict(df_feats.drop('price', axis=1).dtypes)
 
+    print("Uploading new models...")
     upload_model(training_types, BUCKET_NAME, "u91_training_format.pkl")
     upload_model(model1, BUCKET_NAME, "u91_1day.pkl")
     upload_model(model2, BUCKET_NAME, "u91_2day.pkl")
