@@ -1,14 +1,21 @@
 import pandas as pd
 import joblib
-import modeling_functions as mf
 import os
 import io
 import boto3
-from query_rds import connect_rds
 import psycopg2
 import psycopg2.extras
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+import sys
+from pathlib import Path
+MODEL_DIR = Path(__file__).resolve().parent
+if str(MODEL_DIR) not in sys.path:
+    sys.path.insert(0, str(MODEL_DIR))
+import modeling_functions as mf
+from query_rds import connect_rds
+
+
 load_dotenv()
 
 BUCKET_NAME = os.environ['MODEL_BUCKET_NAME']

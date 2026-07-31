@@ -10,3 +10,4 @@ boto3==1.43.46
 streamlit==1.60.0
 plotly==6.9.0
 matplotlib==3.10.9
+joblib==1.5.3

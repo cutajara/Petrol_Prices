@@ -1,10 +1,17 @@
-import modeling_functions as mf
 import joblib
 import io
 import boto3
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import sys
+from pathlib import Path
+
+MODEL_DIR = Path(__file__).resolve().parent
+if str(MODEL_DIR) not in sys.path:
+    sys.path.insert(0, str(MODEL_DIR))
+import modeling_functions as mf
+
 load_dotenv()
 
 BUCKET_NAME = os.environ['MODEL_BUCKET_NAME']

@@ -1,4 +1,3 @@
-from query_rds import query_rds
 import pandas as pd
 from datetime import datetime, timezone
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
@@ -8,6 +7,12 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+import sys
+from pathlib import Path
+MODEL_DIR = Path(__file__).resolve().parent
+if str(MODEL_DIR) not in sys.path:
+    sys.path.insert(0, str(MODEL_DIR))
+from query_rds import query_rds
 
 def extract_prices(extrafilter = ""):
     dfp = query_rds(f"""SELECT
