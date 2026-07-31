@@ -15,7 +15,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-southeast-2 # Change to your AWS Region
+          aws-region: ${{ secrets.REGION }}
 
       - name: Log in to Amazon ECR
         id: login-ecr
@@ -50,26 +50,57 @@ jobs:
            --function-name station_geo \
            --image-config '{"Command":["data.servo_saver.append_station_geo_lambda.lambda_handler"]}'
 
+          
+          # Train U91 Model
+          aws lambda update-function-code --function-name train_u91 --image-uri $IMAGE_URI
+          aws lambda wait function-updated --function-name train_u91
+          aws lambda update-function-configuration \
+           --function-name train_u91 \
+           --image-config '{"Command":["Model.train_u91.lambda_handler"]}'
+          
+           # Update U91 Predictor
+          aws lambda update-function-code --function-name predict_u91 --image-uri $IMAGE_URI
+          aws lambda wait function-updated --function-name predict_u91
+          aws lambda update-function-configuration \
+           --function-name predict_u91 \
+           --image-config '{"Command":["Model.predict_u91.lambda_handler"]}'
+
+
+
       - name: Wait for updates to complete
         run: |
           aws lambda wait function-updated --function-name servo_data
           aws lambda wait function-updated --function-name market_data
           aws lambda wait function-updated --function-name station_geo
+          aws lambda wait function-updated --function-name train_u91
+          aws lambda wait function-updated --function-name predict_u91
           
       - name: Update Lambda environment variables
         env:
           SERVO_SAVER_API: ${{ secrets.SERVO_SAVER_API }}
-          SECRET_NAME: ${{ secrets.SECRET_NAME }}
-          RDS_ENDPOINT: ${{ secrets.RDS_ENDPOINT }}
+          AURORA_DB: ${{ secrets.AURORA_DB }}
+          AURORA_ENDPOINT: ${{ secrets.AURORA_ENDPOINT }}
+          AURORA_USER: ${{ secrets.AURORA_USER }}
+          REGION: ${{ secrets.REGION }}
+          MODEL_BUCKET_NAME: ${{ secrets.MODEL_BUCKET_NAME }}
         run: |
           aws lambda update-function-configuration \
             --function-name servo_data \
-            --environment "Variables={SERVO_SAVER_API=$SERVO_SAVER_API,SECRET_NAME=$SECRET_NAME,RDS_ENDPOINT=$RDS_ENDPOINT}"
+            --environment "Variables={SERVO_SAVER_API=$SERVO_SAVER_API,AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"
 
           aws lambda update-function-configuration \
             --function-name market_data \
-            --environment "Variables={SECRET_NAME=$SECRET_NAME,RDS_ENDPOINT=$RDS_ENDPOINT}"
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"
 
           aws lambda update-function-configuration \
             --function-name station_geo \
-            --environment "Variables={SECRET_NAME=$SECRET_NAME,RDS_ENDPOINT=$RDS_ENDPOINT}"
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"
+
+          aws lambda update-function-configuration \
+            --function-name train_u91 \
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION,MODEL_BUCKET_NAME=$MODEL_BUCKET_NAME}"
+
+
+          aws lambda update-function-configuration \
+            --function-name predict_u91 \
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION,MODEL_BUCKET_NAME=$MODEL_BUCKET_NAME}"

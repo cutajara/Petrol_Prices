@@ -16,15 +16,15 @@ if str(MARKET_DIR) not in sys.path:
 from get_servo_saver import fetch_api, process_response
 
 # --- Logging ---
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # --- Config ---
-SECRET_NAME = os.environ.get("SECRET_NAME", "petrol-predictor/rds")
-RDS_ENDPOINT = os.environ.get("RDS_ENDPOINT", "petrol-predictor/rds")
+AURORA_ENDPOINT = os.environ["AURORA_ENDPOINT"]
+REGION = os.environ["REGION"]
+AURORA_DB = os.environ["AURORA_DB"]
+AURORA_USER = os.environ["AURORA_USER"]
+AURORA_HOST= f"{AURORA_DB}.{AURORA_ENDPOINT}.{REGION}.rds.amazonaws.com"
 API_URL     = "https://api.fuel.service.vic.gov.au/open-data/v1/fuel/prices"
 
 
@@ -32,24 +32,28 @@ API_URL     = "https://api.fuel.service.vic.gov.au/open-data/v1/fuel/prices"
 # Database
 # ---------------------------------------------------------------
 
-def get_db_credentials() -> dict:
-    """Fetch RDS credentials from Secrets Manager."""
-    client = boto3.client("secretsmanager", region_name="ap-southeast-2")
-    secret = client.get_secret_value(SecretId=SECRET_NAME)
-    return json.loads(secret["SecretString"])
+def get_iam_token() -> str:
+    """Generate IAM auth token for Aurora."""
+    client = boto3.client("rds", region_name=REGION)
+    return client.generate_db_auth_token(
+        DBHostname=AURORA_HOST,
+        Port=5432,
+        DBUsername=AURORA_USER,
+        Region=REGION,
+    )
 
 
 def get_db_connection():
-    """Get a psycopg2 connection using Secrets Manager credentials."""
-    creds = get_db_credentials()
+    """Get a psycopg2 connection using IAM."""
     return psycopg2.connect(
-        host=f"{RDS_ENDPOINT}.ap-southeast-2.rds.amazonaws.com",
+        host=AURORA_HOST,
         port=5432,
-        dbname="petrol_predictor",
-        user=creds["username"],
-        password=creds["password"],
+        #dbname=AURORA_DB,
+        database='postgres',
+        user=AURORA_USER,
+        password=get_iam_token(),
         sslmode="require",
-        connect_timeout=10,
+        connect_timeout=300,
     )
 
 
@@ -154,7 +158,7 @@ def run():
 
         # 3. Process response
         stations_df, prices_df = process_response(data)
-        print(stations_df.head())
+        #print(stations_df.head())
         # 4. Upsert stations
         upsert_stations(conn, stations_df.reset_index())
 

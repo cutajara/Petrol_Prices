@@ -11,11 +11,8 @@ from append_station_geo import download_abs_meshblockdata, append_geographic_inf
 from poller_lambda import get_db_connection
 
 # --- Logging ---
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # --- Config ---
 SECRET_NAME = os.environ.get("SECRET_NAME", "petrol-predictor/rds")
@@ -79,10 +76,13 @@ def run():
             logger.info("All stations have geography assigned — nothing to do")
             return
 
+        conn.close()
         meshblock = download_abs_meshblockdata()
-        
+        logger.info("Download Complete")
         geography_df = append_geographic_info(stations_df,meshblock)
         
+        logger.inf("Ready to update RDS")
+        conn = get_db_connection()
         update_stations(conn, geography_df) 
     
     finally:
