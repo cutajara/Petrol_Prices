@@ -72,3 +72,37 @@ ON market_data (metric, date DESC);
 
 CREATE INDEX IF NOT EXISTS idx_market_data_date
 ON market_data (date DESC);
+
+
+-- =====================
+-- Table: forecasts
+-- =====================
+CREATE TABLE IF NOT EXISTS forecasts (
+    id              SERIAL PRIMARY KEY,
+    forecastdate    DATE NOT NULL,
+    fuel_type       TEXT NOT NULL,
+    daysforward     NUMERIC NOT NULL,
+    effectivedate   DATE NOT NULL,
+    price           NUMERIC NOT NULL,
+    forecasted_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (forecastdate, fuel_type, daysforward)
+);
+
+CREATE INDEX IF NOT EXISTS idx_forecasts_fuel_forecastdate
+ON forecasts (fuel_type, forecastdate DESC);
+
+CREATE INDEX IF NOT EXISTS idx_forecasts_effectivedate
+ON forecasts (effectivedate DESC);
+
+
+CREATE USER streamlit_readonly WITH PASSWORD '*******';
+
+-- Grant read access
+GRANT CONNECT ON DATABASE "petrol-predictor-db-aurora" TO streamlit_readonly;
+GRANT USAGE ON SCHEMA public TO streamlit_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO streamlit_readonly;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT ON TABLES TO streamlit_readonly;
+
+-- Enable IAM auth for this user
+GRANT rds_iam TO streamlit_readonly;

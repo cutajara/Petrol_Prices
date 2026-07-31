@@ -50,11 +50,30 @@ jobs:
            --function-name station_geo \
            --image-config '{"Command":["data.servo_saver.append_station_geo_lambda.lambda_handler"]}'
 
+          
+          # Train U91 Model
+          aws lambda update-function-code --function-name train_u91 --image-uri $IMAGE_URI
+          aws lambda wait function-updated --function-name train_u91
+          aws lambda update-function-configuration \
+           --function-name train_u91 \
+           --image-config '{"Command":["Model.train_u91.lambda_handler"]}'
+          
+           # Update U91 Predictor
+          aws lambda update-function-code --function-name predict_u91 --image-uri $IMAGE_URI
+          aws lambda wait function-updated --function-name predict_u91
+          aws lambda update-function-configuration \
+           --function-name predict_u91 \
+           --image-config '{"Command":["Model.predict_u91.lambda_handler"]}'
+
+
+
       - name: Wait for updates to complete
         run: |
           aws lambda wait function-updated --function-name servo_data
           aws lambda wait function-updated --function-name market_data
           aws lambda wait function-updated --function-name station_geo
+          aws lambda wait function-updated --function-name train_u91
+          aws lambda wait function-updated --function-name predict_u91
           
       - name: Update Lambda environment variables
         env:
@@ -74,4 +93,13 @@ jobs:
 
           aws lambda update-function-configuration \
             --function-name station_geo \
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"
+
+          aws lambda update-function-configuration \
+            --function-name train_u91 \
+            --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"
+
+
+          aws lambda update-function-configuration \
+            --function-name predict_u91 \
             --environment "Variables={AURORA_DB=$AURORA_DB,AURORA_ENDPOINT=$AURORA_ENDPOINT,AURORA_USER=$AURORA_USER,REGION=$REGION}"

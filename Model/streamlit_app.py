@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import modeling_functions as mf
 import plotly.graph_objects as go
+from query_rds import query_rds
 
 st.set_page_config(
     page_title="Victorian Petrol Price Forecast",
@@ -46,11 +47,26 @@ dfm = mf.extract_markets(dates_list)
 
 dfm['date'] = dfm['date'].astype(str)
 dfp['price_date'] = dfp['price_date'].astype(str)
-df = dfm.merge(dfp, left_on='date', right_on="price_date", how="left")
-dforecast = pd.read_csv('forecast.csv')
-dforecast = dforecast.loc[dforecast['fuel_type']=='U91',:]
-dforecast = dforecast.rename(columns={'effectivedate': 'date'})
-df = df.merge(dforecast, how ='outer', suffixes=['', '_forecast'], on='date')
+df = dfm.merge(dfp, left_on='date', right_on="price_date", how="outer")
+df.loc[df['date'].isna(),'date'] = df.loc[df['date'].isna(),'price_date']
+df.loc[df['price_date'].isna(),'price_date'] = df.loc[df['price_date'].isna(),'date']
+df['brent_crude'] = df['brent_crude'].ffill() # Fill in missing values with the last known value
+df['usd_aud'] = df['usd_aud'].ffill() # Fill in missing values with the last known value
+df['price'] = df['price'].ffill() # Fill in missing values with the last known value
+
+latestday = df.iloc[-1,:]['date']
+
+#dforecast = pd.read_csv('forecast.csv')
+#dforecast = dforecast.loc[dforecast['fuel_type']=='U91',:]
+#dforecast = dforecast.loc[dforecast['forecastdate']==latestday,:]
+#dforecast = dforecast.rename(columns={'effectivedate': 'date'})
+
+dforecast = query_rds(f"SELECT forecastdate, price, effectivedate as date FROM forecasts WHERE fuel_type = 'U91' AND forecastdate = '{latestday}'")
+dforecast['date'] = dforecast['date'].astype(str)
+dforecast['forecastdate'] = dforecast['forecastdate'].astype(str)
+
+
+df = df.merge(dforecast, how ='outer', suffixes=['', '_forecast'], on='date') # Merge on date
 df.loc[df['date']==dforecast['forecastdate'].values[0], 'price_forecast'] = df.loc[df['date']==dforecast['forecastdate'].values[0], 'price']
 
 

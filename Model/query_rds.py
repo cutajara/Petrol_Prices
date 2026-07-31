@@ -5,9 +5,6 @@ import boto3
 from dotenv import load_dotenv
 load_dotenv()
 
-RDS_ENDPOINT = os.environ["RDS_ENDPOINT"]
-RDS_SECRET = os.environ["RDS_SECRET"]
-
 AURORA_ENDPOINT = os.environ["AURORA_ENDPOINT"]
 REGION = os.environ["REGION"]
 AURORA_DB = os.environ["AURORA_DB"]
@@ -25,10 +22,9 @@ def get_iam_token() -> str:
         Region=REGION,
     )
 
-def query_rds(sql):
 
-    # Check RDS
-    rds = psycopg2.connect(
+def connect_rds():
+    return psycopg2.connect(
         host=AURORA_HOST,
         port=5432,
         #dbname=AURORA_DB,
@@ -38,6 +34,11 @@ def query_rds(sql):
         sslmode="require",
         connect_timeout=10,
     )
+
+def query_rds(sql):
+
+    # Check RDS
+    rds = connect_rds()
     cur = rds.cursor()
 
     cur.execute(sql)
