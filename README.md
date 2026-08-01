@@ -1,6 +1,8 @@
 # Petrol_Prices
 Forecast VIC Petrol Prices
 
+**Live Site:** [https://petrolprices-vic.streamlit.app/](https://petrolprices-vic.streamlit.app/)
+
 Application runs in AWS to select data from inputs sources and store in database. Streamlit app to run the front end for users.
 
 ```mermaid
@@ -23,6 +25,8 @@ graph TD
         GA[GitHub Actions<br>Update Lambdas]:::github
     end
 
+    GA -->|Push to main| Streamlit
+
     %% AWS Cloud
     subgraph AWS_Cloud ["AWS — ap-southeast-2 (Sydney)"]
 
@@ -32,58 +36,63 @@ graph TD
         subgraph Lambdas ["Lambda Functions"]
             L1[petrol-poller]:::awsGreen
             L2[market-data]:::awsGreen
+            L3[train-model]:::awsGreen
+            L4[predict-model]:::awsGreen
         end
-
-        subgraph VPC ["VPC — petrol-predictor-vpc"]
-            subgraph Subnets ["Private Subnets (ap-southeast-2a · 2b)"]
-                RDS[(RDS PostgreSQL<br>petrol_predictor<br>db.t3.micro)]:::awsBlue
-            end
-        end
-
-        IGW[Internet Gateway]:::awsOrange
+        RDS[(RDS Aurora \n PostgreSQL)]:::awsBlue
+        S3[(S3 Bucket<br>Model Storage)]:::awsBlue
+        
+        
 
     end
 
+    Streamlit([Streamlit App<br>Front End]):::streamlit
+    User([User<br>Browser]):::external
+
+    %% GitHub → AWS
+
 GA --> ECR
-ECR --> L1
 ECR --> L2
 
     %% External → Lambda
     ServoAPI -->|Fuel price data| L1
-    YFinance -->|Market data| L2
+ECR --> L1
 
     %% EventBridge → Lambda
-    EB -->|Every 6h| L1
     EB -->|Every 24h| L2
+    EB -->|Every 6h| L1
+    EB -->|Every 24h| L3
+    EB -->|Every 24h| L4
+
+    YFinance -->|Market data| L2
+
+    RDS --> L3
+    L3 --> S3
+
+    RDS --> L4
+    S3 --> L4
+    L4 --> RDS
 
 
+    %% Lambda → RDS
+    L1 -->|Insert prices| RDS
+    L2 -->|Insert market data| RDS
 
-    %% Lambda → RDS via IGW
-    L1 -->|Insert prices| IGW
-    L2 -->|Insert market data| IGW
-    IGW --> RDS
 
 
     
     %% Streamlit → RDS
-    Streamlit -->|SELECT only · streamlit_readonly| IGW
+    Streamlit -->|SELECT only · streamlit_readonly| RDS
     User -->|Browser| Streamlit
 ```
 
 ## Input Sources:
-- VIC Servo Saver API
+- [VIC Servo Saver API](https://service.vic.gov.au/find-services/transport-and-driving/servo-saver)
 - Financial market data from ```yfinance``` package
 
 ## Flow
-- EventBridge schedules Lambda functions to select the data and insert into RDS Postgres database
+- EventBridge schedules Lambda functions to select the data and insert into RDS database
 - The Lambda environment runs as in image which is stored in ECR, this is updated with Github actions on changes to main.
-- Secrets manager stores the keys
+- Models are trained and stored in S3
+- Predictions write to the database and allow the Streamlit app to read the requirement data
 - CloudWatch alarms are set to notify of errors via SNS
-
-## Next Steps
-- Develop a model to forecast petrol prices
-- Serve this to a website for the public
-
-
-# Supabase
-Flow was orignally run with Github actions and Supabase. This has been mirgated to AWS. The supabase and Github actions runs are still supported at the moment.

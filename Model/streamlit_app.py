@@ -37,7 +37,7 @@ st.markdown(
 
 st.title("Victorian Petrol Price Forecast")
 st.subheader("Should you fill up today, or wait?")
-st.markdown("Ever wondered if you waited a day to two, could to refuel you car cheaper? "
+st.markdown("Ever wondered if you waited a day to two, could to refuel your car cheaper? "
             "This project aims to take the 'gamble' element out of when to fill up your car, by using Machine Learning to forecast the next 3 days prices. The forecast of U91 (atm) uses the [VIC Servo Saver API](https://service.vic.gov.au/find-services/transport-and-driving/servo-saver) and financial market data.")
 
 extrafilter = "AND (updated_at AT TIME ZONE 'Australia/Melbourne')::date >= (now() AT TIME ZONE 'Australia/Melbourne')::date - INTERVAL '28 days'"
@@ -76,12 +76,13 @@ latest_brent = df["brent_crude"].dropna().iloc[-1]
 
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Latest observed price", f"${latest_price:.2f}")
-col2.metric("Latest forecast", f"${latest_forecast:.2f}")
-col3.metric("Latest Brent value", f"{latest_brent:.2f}")
+col1.metric("Latest observed price", f"{latest_price:.2f}c/L")
+col2.metric("Latest forecast", f"{latest_forecast:.2f}c/L")
+col3.metric("Latest Brent value", f"{latest_brent:.2f} AUD/barrel")
 
 st.subheader("Price forecast")
 #st.line_chart(df, x="date", y=["price",'brent_crude', "price_forecast"])
+
 
 fig = go.Figure()
 
@@ -90,7 +91,7 @@ fig.add_trace(
         x=df["date"],
         y=df["price"],
         mode="lines",
-        name="price",
+        name="Price (c/L)",
         line=dict(color="#2563eb", width=2),
         yaxis="y",
     )
@@ -118,7 +119,7 @@ fig.add_trace(
     )
 )
 fig.update_layout(
-    yaxis=dict(title="Price"),
+    yaxis=dict(title="Price (c/L)"),
     yaxis2=dict(title="Brent Crude (AUD)", overlaying="y", side="right"),
     legend=dict(
         orientation="h",
@@ -129,4 +130,9 @@ fig.update_layout(
     )
 )
 
-st.plotly_chart(fig, use_container_width=True)
+
+st.plotly_chart(
+    fig,
+    use_container_width=True,
+    config={"responsive": True, "displayModeBar": False},
+)
