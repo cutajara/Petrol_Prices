@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 import sys
 from pathlib import Path
+from urllib.parse import urlencode
 
 MODEL_DIR = Path(__file__).resolve().parent
 if str(MODEL_DIR) not in sys.path:
@@ -28,8 +29,9 @@ def upload_model(model, bucket: str, key: str):
     buffer.seek(0)  # rewind before reading
     s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())
     key2=key.replace('.pkl','_') + datetime.now().strftime("%Y%m%d_%H%M%S") + '.pkl'
-    s3.put_object(Bucket=bucket, Key=key2, Body=buffer.getvalue())
-    
+    tagging = urlencode({"model": "archive"})
+    s3.put_object(Bucket=bucket, Key=key2, Body=buffer.getvalue(), Tagging=tagging)
+
 
 def train_model():
     print("Getting data...")

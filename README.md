@@ -3,7 +3,9 @@ Forecast VIC Petrol Prices
 
 **Live Site:** [https://petrolprices-vic.streamlit.app/](https://petrolprices-vic.streamlit.app/)
 
-Application runs in AWS to select data from inputs sources and store in database. Streamlit app to run the front end for users.
+Application runs in AWS to select data from inputs sources and store in database.
+Machine Learning model (Random Forest) is trained on the data to forecast future prices.
+Streamlit app to run the front end for users to see  the forecast.
 
 ```mermaid
 graph TD
@@ -52,26 +54,27 @@ graph TD
     %% GitHub → AWS
 
 GA --> ECR
-ECR --> L2
 
     %% External → Lambda
     ServoAPI -->|Fuel price data| L1
-ECR --> L1
 
     %% EventBridge → Lambda
     EB -->|Every 24h| L2
     EB -->|Every 6h| L1
     EB -->|Every 24h| L3
-    EB -->|Every 24h| L4
+
+ECR --> L1
+ECR --> L2
 
     YFinance -->|Market data| L2
 
-    RDS --> L3
-    L3 --> S3
 
-    RDS --> L4
+    RDS --> L3
+    L3 -->|Save Model| S3
+
+    L1 -->|Update Forecast| L4
     S3 --> L4
-    L4 --> RDS
+    L4 -->|Insert Forecast| RDS
 
 
     %% Lambda → RDS
@@ -92,7 +95,7 @@ ECR --> L1
 
 ## Flow
 - EventBridge schedules Lambda functions to select the data and insert into RDS database
-- The Lambda environment runs as in image which is stored in ECR, this is updated with Github actions on changes to main.
+- The Lambda environment runs as an image which is stored in ECR, this is updated with Github actions on changes to main.
 - Models are trained and stored in S3
-- Predictions write to the database and allow the Streamlit app to read the requirement data
+- Predictions write to the database and allow the Streamlit app to read the requiremed data
 - CloudWatch alarms are set to notify of errors via SNS

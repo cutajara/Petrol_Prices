@@ -78,7 +78,7 @@ latest_brent = df["brent_crude"].dropna().iloc[-1]
 col1, col2, col3 = st.columns(3)
 col1.metric("Latest observed price", f"{latest_price:.2f}c/L")
 col2.metric("Latest forecast", f"{latest_forecast:.2f}c/L")
-col3.metric("Latest Brent value", f"{latest_brent:.2f} AUD/barrel")
+col3.metric("Latest Brent value", f"${latest_brent:.2f} AUD/barrel")
 
 st.subheader("Price forecast")
 #st.line_chart(df, x="date", y=["price",'brent_crude', "price_forecast"])
