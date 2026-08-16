@@ -63,22 +63,32 @@ def predict():
     model1 = download_model(s3, BUCKET_NAME, 'u91_1day.pkl')
     model2 = download_model(s3, BUCKET_NAME, 'u91_2day.pkl')
     model3 = download_model(s3, BUCKET_NAME, 'u91_3day.pkl')
-    #model1 = joblib.load('u91_1day.pkl')
-    #model2 = joblib.load('u91_2day.pkl')
-    #model3 = joblib.load('u91_3day.pkl')
+    model4 = download_model(s3, BUCKET_NAME, 'u91_4day.pkl')
+    model5 = download_model(s3, BUCKET_NAME, 'u91_5day.pkl')
+    model6 = download_model(s3, BUCKET_NAME, 'u91_6day.pkl')
+
     print("Making predictions...")
     daychange_1 = model1.predict(pd.DataFrame(df_feats.iloc[-1]).T)
     daychange_2 = model2.predict(pd.DataFrame(df_feats.iloc[-1]).T)
     daychange_3 = model3.predict(pd.DataFrame(df_feats.iloc[-1]).T)
+    daychange_4 = model4.predict(pd.DataFrame(df_feats.iloc[-1]).T)
+    daychange_5 = model5.predict(pd.DataFrame(df_feats.iloc[-1]).T)
+    daychange_6 = model6.predict(pd.DataFrame(df_feats.iloc[-1]).T)
 
     day1 = (pd.to_datetime(df_feats.iloc[-1].name) + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
     day2 = (pd.to_datetime(df_feats.iloc[-1].name) + pd.Timedelta(days=2)).strftime('%Y-%m-%d')
     day3 = (pd.to_datetime(df_feats.iloc[-1].name) + pd.Timedelta(days=3)).strftime('%Y-%m-%d')
+    day4 = (pd.to_datetime(df_feats.iloc[-1].name) + pd.Timedelta(days=4)).strftime('%Y-%m-%d')
+    day5 = (pd.to_datetime(df_feats.iloc[-1].name) + pd.Timedelta(days=5)).strftime('%Y-%m-%d')
+    day6 = (pd.to_datetime(df_feats.iloc[-1].name) + pd.Timedelta(days=6)).strftime('%Y-%m-%d')
 
     print(df_feats.iloc[-1].name, latestprice)
     print(day1, daychange_1[0], latestprice+daychange_1[0])
     print(day2, daychange_2[0], latestprice+daychange_2[0])
     print(day3, daychange_3[0], latestprice+daychange_3[0])
+    print(day4, daychange_4[0], latestprice+daychange_4[0])
+    print(day5, daychange_5[0], latestprice+daychange_5[0])
+    print(day6, daychange_6[0], latestprice+daychange_6[0])
 
 
     sql = """
@@ -98,7 +108,10 @@ def predict():
     rows = [
         (df_feats.iloc[-1].name, 'U91', 1, day1, round(float(latestprice+daychange_1[0]),2), now),
         (df_feats.iloc[-1].name, 'U91', 2, day2, round(float(latestprice+daychange_2[0]),2), now),
-        (df_feats.iloc[-1].name, 'U91', 3, day3, round(float(latestprice+daychange_3[0]),2),now)
+        (df_feats.iloc[-1].name, 'U91', 3, day3, round(float(latestprice+daychange_3[0]),2),now),
+        (df_feats.iloc[-1].name, 'U91', 4, day4, round(float(latestprice+daychange_4[0]),2),now),
+        (df_feats.iloc[-1].name, 'U91', 5, day5, round(float(latestprice+daychange_5[0]),2),now),
+        (df_feats.iloc[-1].name, 'U91', 6, day6, round(float(latestprice+daychange_6[0]),2),now),
     ]
 
 
@@ -107,17 +120,8 @@ def predict():
     with conn.cursor() as cur:
             psycopg2.extras.execute_batch(cur, sql, rows, page_size=500)
     conn.commit()
-    print(f"Upserted {len(rows)} stations")
+    print(f"Upserted {len(rows)} predictions")
 
-    #dforecast = pd.DataFrame(
-    #    {'forecastdate': [df_feats.iloc[-1].name, df_feats.iloc[-1].name, df_feats.iloc[-1].name],
-    #    'fuel_type': ['U91','U91','U91'],
-    #    'daysforward' : [1, 2, 3],
-    #    'effectivedate' : [day1, day2, day3],
-    #    'price' : [round(latestprice+daychange_1[0],2), round(latestprice+daychange_2[0],2), round(latestprice+daychange_3[0],2)],
-    #    }
-    #)
-    #dforecast.to_csv('forecast.csv', mode='a', header=False, index=False)
 
 
 def lambda_handler(event, context):

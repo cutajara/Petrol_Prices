@@ -36,3 +36,6 @@ jobs:
 
       - name: docker build
         run: docker build -t testingbuild .
+
+      - name: streamlit build
+        run: python -m py_compile Model/streamlit_app.py

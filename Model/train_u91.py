@@ -45,12 +45,15 @@ def train_model():
 
     print("Preparing data...")
     df_feats = mf.features(df)
-    #
+
     print("Training models...")
     model1 = mf.trainmodel(df_feats.copy(), 1)
     model2 = mf.trainmodel(df_feats.copy(), 2)
     model3 = mf.trainmodel(df_feats.copy(), 3)
-    #
+    model4 = mf.trainmodel(df_feats.copy(), 4)
+    model5 = mf.trainmodel(df_feats.copy(), 5)
+    model6 = mf.trainmodel(df_feats.copy(), 6)
+    
     training_types = dict(df_feats.drop('price', axis=1).dtypes)
 
     print("Uploading new models...")
@@ -58,12 +61,10 @@ def train_model():
     upload_model(model1, BUCKET_NAME, "u91_1day.pkl")
     upload_model(model2, BUCKET_NAME, "u91_2day.pkl")
     upload_model(model3, BUCKET_NAME, "u91_3day.pkl")
-    
-    #joblib.dump(training_types, "u91_training_format.pkl")
-    #joblib.dump(model1, "u91_1day.pkl")
-    #joblib.dump(model2, "u91_2day.pkl")
-    #joblib.dump(model3, "u91_3day.pkl")
-    
+    upload_model(model4, BUCKET_NAME, "u91_4day.pkl")
+    upload_model(model5, BUCKET_NAME, "u91_5day.pkl")
+    upload_model(model6, BUCKET_NAME, "u91_6day.pkl")
+        
 def lambda_handler(event, context):
     """AWS Lambda entry point."""
     train_model()
