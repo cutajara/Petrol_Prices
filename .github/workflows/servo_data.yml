@@ -1,8 +1,8 @@
 name: Get Servo Saver Data
 
 on:
-  schedule:
-    - cron: '15 8,20 * * *'
+  #schedule:
+  #  - cron: '15 8,20 * * *'
   workflow_dispatch:
 
 jobs:
