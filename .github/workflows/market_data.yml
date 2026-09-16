@@ -1,8 +1,8 @@
 name: Get Market Data
 
 on:
-  schedule:
-    - cron: '10 6 * * *'
+ # schedule:
+ #   - cron: '10 6 * * *'
   workflow_dispatch:
 
 jobs:
